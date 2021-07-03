@@ -58,16 +58,14 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.6'
 
     // Architecture Components
-    //Navigation dependencies
     implementation "androidx.lifecycle:lifecycle-common-java8:$archLifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$archLifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$archLifecycleVersion"
 
+    //Navigation dependencies
     implementation "androidx.navigation:navigation-fragment-ktx:$navigationVersion"
     implementation "androidx.navigation:navigation-ui-ktx:$navigationVersion"
-
-    implementation "androidx.test.espresso:espresso-idling-resource:$espressoVersion"
 
     //Room dependencies
     implementation "androidx.room:room-ktx:$roomVersion"
@@ -76,6 +74,8 @@ dependencies {
 
     //Coroutines Dependencies
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion"
+    
+    implementation "androidx.test.espresso:espresso-idling-resource:$espressoVersion"
 
     //Koin
     implementation "org.koin:koin-android:$koinVersion"
@@ -123,5 +123,5 @@ dependencies {
     implementation "com.google.android.gms:play-services-maps:17.0.1"
 
     //Firebase UI
-    //implementation 'com.firebaseui:firebase-ui-auth:7.2.0'
+    implementation 'com.firebaseui:firebase-ui-auth:7.2.0'
 }
