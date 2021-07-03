@@ -30,7 +30,10 @@ android {
         includeAndroidResources = true
         returnDefaultValues = true
     }
-
+//    compileOptions {
+//        sourceCompatibility JavaVersion.VERSION_1_8
+//        targetCompatibility JavaVersion.VERSION_1_8
+//    }
     //dataBinding {
     //    enabled = true
     //    enabledForTests = true
@@ -56,7 +59,7 @@ dependencies {
 
     // Architecture Components
     //Navigation dependencies
-    kapt "androidx.lifecycle:lifecycle-common:$archLifecycleVersion"
+    implementation "androidx.lifecycle:lifecycle-common-java8:$archLifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$archLifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$archLifecycleVersion"
@@ -110,14 +113,14 @@ dependencies {
     // Once https://issuetracker.google.com/127986458 is fixed this can be testImplementation
     debugImplementation "androidx.fragment:fragment-testing:$fragmentVersion"
     implementation "androidx.test:core:$androidXTestCoreVersion"
-    implementation "androidx.fragment:fragment:$fragmentVersion"
+    implementation "androidx.fragment:fragment-ktx:$fragmentVersion"
     androidTestImplementation "org.mockito:mockito-core:$mockitoVersion"
     androidTestImplementation "com.linkedin.dexmaker:dexmaker-mockito:$dexMakerVersion"
     androidTestImplementation('org.koin:koin-test:2.0.1') { exclude group: 'org.mockito' }
 
     //Maps & Geofencing
     implementation "com.google.android.gms:play-services-location:$playServicesVersion"
-    implementation "com.google.android.gms:play-services-maps:$playServicesVersion"
+    implementation "com.google.android.gms:play-services-maps:17.0.1"
 
     //Firebase UI
     //implementation 'com.firebaseui:firebase-ui-auth:7.2.0'
