@@ -294,11 +294,6 @@ class SelectLocationFragment : BaseFragment() {
             .addOnSuccessListener { location: Location? ->
                 if (location != null) {
                     val latLng = LatLng(location.latitude, location.longitude)
-                    map.addMarker(
-                        MarkerOptions()
-                            .position(latLng)
-                            .title("You")
-                    )
                     val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 12f)
                     map.animateCamera(cameraUpdate)
                 } else {
