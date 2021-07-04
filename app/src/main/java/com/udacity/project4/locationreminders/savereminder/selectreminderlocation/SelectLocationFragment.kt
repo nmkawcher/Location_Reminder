@@ -64,12 +64,14 @@ class SelectLocationFragment : BaseFragment() {
         setHasOptionsMenu(true)
         setDisplayHomeAsUpEnabled(true)
 
-//        TODO: add the map setup implementation
-//        TODO: zoom to the user location after taking his permission
-//        TODO: add style to the map
-//        TODO: put a marker to location that the user selected
+        //  add the map setup implementation
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment?.getMapAsync(callback)
+        //  zoom to the user location after taking his permission
+        checkPermissionsAndStartGeofencing()
+        //         add style to the map
+        //     put a marker to location that the user selected
+
 
         // call this function after the user confirms on the selected location
         binding.saveBtn.setOnClickListener {
@@ -84,9 +86,9 @@ class SelectLocationFragment : BaseFragment() {
 //        val sydney = LatLng(-34.0, 151.0)
 //        map.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
 //        map.moveCamera(CameraUpdateFactory.newLatLng(sydney))
-        val miprurLatLng = LatLng(23.80480, 90.36358)
-        val cameraUpdate = CameraUpdateFactory.newLatLngZoom(miprurLatLng, 12f)
-        map.animateCamera(cameraUpdate)
+//        val miprurLatLng = LatLng(23.80480, 90.36358)
+//        val cameraUpdate = CameraUpdateFactory.newLatLngZoom(miprurLatLng, 12f)
+//        map.animateCamera(cameraUpdate)
         setMapLongClick(map)
         setPoiClick(map)
     }
@@ -123,11 +125,6 @@ class SelectLocationFragment : BaseFragment() {
     }
 
 
-    override fun onStart() {
-        super.onStart()
-        checkPermissionsAndStartGeofencing()
-    }
-
     override fun onAttach(context: Context) {
         super.onAttach(context)
         requestPermissionLauncher =
@@ -148,7 +145,6 @@ class SelectLocationFragment : BaseFragment() {
                     ) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                             requestPermissionLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-
                         } else {
                             Log.d(TAG, "granted")
                             checkDeviceLocationSettingsAndStartGeofence()
@@ -243,7 +239,6 @@ class SelectLocationFragment : BaseFragment() {
             return
 
         requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-
     }
 
     /*
