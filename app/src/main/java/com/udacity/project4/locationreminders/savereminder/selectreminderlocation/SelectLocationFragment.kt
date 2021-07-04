@@ -10,6 +10,7 @@ import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.content.res.Resources
+import android.location.Location
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -49,6 +50,7 @@ class SelectLocationFragment : BaseFragment() {
     private val runningQOrLater = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
     private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
     private lateinit var map: GoogleMap
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -286,6 +288,24 @@ class SelectLocationFragment : BaseFragment() {
     @SuppressLint("MissingPermission")
     private fun enableMyLocation() {
         map.isMyLocationEnabled = true
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
+        fusedLocationClient.lastLocation
+            .addOnSuccessListener { location: Location? ->
+                if (location != null) {
+                    val latLng = LatLng(location.latitude, location.longitude)
+                    map.addMarker(
+                        MarkerOptions()
+                            .position(latLng)
+                            .title("You")
+                    )
+                    val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 12f)
+                    map.animateCamera(cameraUpdate)
+                } else {
+                    Toast.makeText(context, "Please Turn on Location", Toast.LENGTH_SHORT)
+                        .show()
+                }
+            }
     }
 
 }
