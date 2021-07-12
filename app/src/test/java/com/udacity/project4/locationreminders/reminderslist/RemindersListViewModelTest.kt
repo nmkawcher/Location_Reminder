@@ -6,7 +6,7 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 @ExperimentalCoroutinesApi
-class RemindersListViewModelTest {
+class   RemindersListViewModelTest {
 
     //TODO: provide testing to the RemindersListViewModel and its live data objects
 
