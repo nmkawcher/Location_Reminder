@@ -52,6 +52,8 @@ class SelectLocationFragment : BaseFragment() {
     private lateinit var map: GoogleMap
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
+    private var selectedPOI: PointOfInterest? = null
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -83,38 +85,13 @@ class SelectLocationFragment : BaseFragment() {
 
     private val callback = OnMapReadyCallback { googleMap ->
         map = googleMap
-//        val sydney = LatLng(-34.0, 151.0)
-//        map.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
-//        map.moveCamera(CameraUpdateFactory.newLatLng(sydney))
-//        val miprurLatLng = LatLng(23.80480, 90.36358)
-//        val cameraUpdate = CameraUpdateFactory.newLatLngZoom(miprurLatLng, 12f)
-//        map.animateCamera(cameraUpdate)
-        setMapLongClick(map)
         setPoiClick(map)
-    }
-
-    private fun setMapLongClick(map: GoogleMap) {
-        map.setOnMapLongClickListener { latLng ->
-            map.clear()
-            val snippet = String.format(
-                Locale.getDefault(),
-                "Lat: %1$.5f, Long: %2$.5f",
-                latLng.latitude,
-                latLng.longitude
-            )
-            map.addMarker(
-                MarkerOptions()
-                    .position(latLng)
-                    .title(getString(R.string.dropped_pin))
-                    .snippet(snippet)
-
-            )
-        }
     }
 
     private fun setPoiClick(map: GoogleMap) {
         map.setOnPoiClickListener { poi ->
             map.clear()
+            selectedPOI = poi
             val poiMarker = map.addMarker(
                 MarkerOptions()
                     .position(poi.latLng)
@@ -164,9 +141,19 @@ class SelectLocationFragment : BaseFragment() {
     }
 
     private fun onLocationSelected() {
-        //        TODO: When the user confirms on the selected location,
+        //         When the user confirms on the selected location,
         //         send back the selected location details to the view model
         //         and navigate back to the previous fragment to save the reminder and add the geofence
+        if (selectedPOI != null) {
+            _viewModel.selectedPOI.value = selectedPOI
+            _viewModel.reminderSelectedLocationStr.value = selectedPOI!!.name
+            _viewModel.latitude.value = selectedPOI!!.latLng.latitude
+            _viewModel.longitude.value = selectedPOI!!.latLng.longitude
+            _viewModel.navigationCommand.value = NavigationCommand.Back
+        } else {
+            Toast.makeText(context, "Please Select a location!", Toast.LENGTH_SHORT).show()
+        }
+
     }
 
 
