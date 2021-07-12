@@ -79,7 +79,7 @@ class SaveReminderFragment : BaseFragment() {
 //             1) add a geofencing request
 //             2) save the reminder to the local db
             addGeofenceForReminder(reminderData)
-            _viewModel.validateAndSaveReminder(reminderData)
+            //_viewModel.validateAndSaveReminder(reminderData)
         }
     }
 
@@ -97,18 +97,19 @@ class SaveReminderFragment : BaseFragment() {
                 GEOFENCE_RADIUS_IN_METERS
             )
             .setExpirationDuration(Geofence.NEVER_EXPIRE)
-            .setNotificationResponsiveness(180000) // Millis to check geofence
-            .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_DWELL)
-            .setLoiteringDelay(10000) //After enter into the Geofence radius
+            //.setNotificationResponsiveness(1000) // Millis to check geofence
+            .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
+            //.setLoiteringDelay(1000) //After enter into the Geofence radius
             .build()
 
         val geofencingRequest = GeofencingRequest.Builder()
-            .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_DWELL)
+            .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
             .addGeofence(geofenceData)
             .build()
 
         geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent).run {
             addOnSuccessListener {
+                _viewModel.validateAndSaveReminder(reminderData)
                 Toast.makeText(
                     context, "geofences_added",
                     Toast.LENGTH_SHORT
@@ -128,7 +129,7 @@ class SaveReminderFragment : BaseFragment() {
 
     companion object {
         internal const val ACTION_GEOFENCE_EVENT =
-            "SaveReminderFragment.locationReminder.action.ACTION_GEOFENCE_EVENT"
+            "locationReminder.action.ACTION_GEOFENCE_EVENT"
         const val TAG = "SaveReminderFragement"
     }
 
