@@ -29,6 +29,7 @@ class SaveReminderFragment : BaseFragment() {
     override val _viewModel: SaveReminderViewModel by inject()
     private lateinit var binding: FragmentSaveReminderBinding
     private lateinit var geofencingClient: GeofencingClient
+
     // A PendingIntent for the Broadcast Receiver that handles geofence transitions.
     //  Step 8 add in a pending intent
     private val geofencePendingIntent: PendingIntent by lazy {
@@ -74,19 +75,16 @@ class SaveReminderFragment : BaseFragment() {
                 latitude,
                 longitude
             )
-            _viewModel.validateAndSaveReminder(reminderData)
-//            TODO: use the user entered reminder details to:
+//            : use the user entered reminder details to:
 //             1) add a geofencing request
 //             2) save the reminder to the local db
             addGeofenceForReminder(reminderData)
+            _viewModel.validateAndSaveReminder(reminderData)
         }
     }
 
     /*
-   * Adds a Geofence for the current clue if needed, and removes any existing Geofence. This
-   * method should be called after the user has granted the location permission.  If there are
-   * no more geofences, we remove the geofence and let the viewmodel know that the ending hint
-   * is now "active."
+   * Adds a Geofence for the Location Reminder
    */
     @SuppressLint("MissingPermission")
     private fun addGeofenceForReminder(reminderData: ReminderDataItem) {
@@ -109,26 +107,20 @@ class SaveReminderFragment : BaseFragment() {
             .addGeofence(geofenceData)
             .build()
 
-        geofencingClient.removeGeofences(geofencePendingIntent).run {
-            addOnCompleteListener {
-                geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent).run {
-                    addOnSuccessListener {
-                        Toast.makeText(
-                            context, "geofences_added",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        //Log.e("Add Geofence", geofence.requestId)
-                        //viewModel.geofenceActivated()
-                    }
-                    addOnFailureListener {
-                        Toast.makeText(
-                            context, R.string.geofences_not_added,
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        if ((it.message != null)) {
-                            Log.w(TAG, it.message!!)
-                        }
-                    }
+        geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent).run {
+            addOnSuccessListener {
+                Toast.makeText(
+                    context, "geofences_added",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+            addOnFailureListener {
+                Toast.makeText(
+                    context, R.string.geofences_not_added,
+                    Toast.LENGTH_SHORT
+                ).show()
+                if ((it.message != null)) {
+                    Log.w(TAG, it.message!!)
                 }
             }
         }
@@ -136,9 +128,10 @@ class SaveReminderFragment : BaseFragment() {
 
     companion object {
         internal const val ACTION_GEOFENCE_EVENT =
-            "HuntMainActivity.treasureHunt.action.ACTION_GEOFENCE_EVENT"
+            "SaveReminderFragment.locationReminder.action.ACTION_GEOFENCE_EVENT"
         const val TAG = "SaveReminderFragement"
     }
+
     override fun onDestroy() {
         super.onDestroy()
         //make sure to clear the view model after destroy, as it's a single view model.

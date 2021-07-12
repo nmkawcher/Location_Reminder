@@ -70,7 +70,7 @@ class SelectLocationFragment : BaseFragment() {
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment?.getMapAsync(callback)
         //  zoom to the user location after taking his permission
-        checkPermissionsAndStartGeofencing()
+       // checkPermissionsAndStartGeofencing()
         //         add style to the map
         //     put a marker to location that the user selected
 
@@ -86,6 +86,7 @@ class SelectLocationFragment : BaseFragment() {
     private val callback = OnMapReadyCallback { googleMap ->
         map = googleMap
         setPoiClick(map)
+        checkPermissionsAndStartGeofencing()
     }
 
     private fun setPoiClick(map: GoogleMap) {
@@ -156,7 +157,6 @@ class SelectLocationFragment : BaseFragment() {
 
     }
 
-
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.map_options, menu)
     }
@@ -224,7 +224,6 @@ class SelectLocationFragment : BaseFragment() {
     private fun requestForegroundAndBackgroundLocationPermissions() {
         if (foregroundAndBackgroundLocationPermissionApproved())
             return
-
         requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
     }
 
