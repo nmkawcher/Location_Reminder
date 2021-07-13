@@ -93,13 +93,11 @@ class SaveReminderFragment : BaseFragment() {
             .setRequestId(reminderData.id)
             .setCircularRegion(
                 reminderData.latitude!!,
-                reminderData.latitude!!,
+                reminderData.longitude!!,
                 GEOFENCE_RADIUS_IN_METERS
             )
             .setExpirationDuration(Geofence.NEVER_EXPIRE)
-            //.setNotificationResponsiveness(1000) // Millis to check geofence
             .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
-            //.setLoiteringDelay(1000) //After enter into the Geofence radius
             .build()
 
         val geofencingRequest = GeofencingRequest.Builder()
