@@ -39,10 +39,10 @@ class GeofenceTransitionsJobIntentService : JobIntentService(), CoroutineScope {
         // send a notification to the user when he enters the geofence area
         //TODO call @sendNotification
         val geofencingEvent = GeofencingEvent.fromIntent(intent)
-        Log.d("geoFence", "geofence event")
+        Log.d(TAG, "geofence event")
         if (geofencingEvent.hasError()) {
             val errorMessage = "Error encountered " + geofencingEvent.errorCode
-            Log.d("geoFence", errorMessage)
+            Log.d(TAG, errorMessage)
             return
         }
         // 3
@@ -86,3 +86,5 @@ class GeofenceTransitionsJobIntentService : JobIntentService(), CoroutineScope {
     }
 
 }
+
+private const val TAG = "GeofenceService"
