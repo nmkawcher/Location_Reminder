@@ -28,8 +28,9 @@ import org.junit.Test
 @SmallTest
 class RemindersDaoTest {
 
-    //    TODO: Add testing implementation to the RemindersDao.kt
-// Executes each task synchronously using Architecture Components.
+    // : Add testing implementation to the RemindersDao.kt
+
+    // Executes each task synchronously using Architecture Components.
     @get:Rule
     var instantExecutorRule = InstantTaskExecutorRule()
 

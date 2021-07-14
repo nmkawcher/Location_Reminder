@@ -1,16 +1,8 @@
 package com.udacity.project4.locationreminders.geofence
 
-import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.util.Log
-import android.widget.Toast
-import androidx.core.content.ContextCompat
-import com.google.android.gms.location.Geofence
-import com.google.android.gms.location.GeofenceStatusCodes
-import com.google.android.gms.location.GeofencingEvent
-import com.udacity.project4.R
 import com.udacity.project4.locationreminders.savereminder.SaveReminderFragment.Companion.ACTION_GEOFENCE_EVENT
 
 /**
@@ -26,12 +18,8 @@ import com.udacity.project4.locationreminders.savereminder.SaveReminderFragment.
 class GeofenceBroadcastReceiver : BroadcastReceiver() {
     //: implement the onReceive method to receive the geofencing events at the background
     override fun onReceive(context: Context, intent: Intent) {
-        Log.d(TAG, "Geofence Trigger On receive!")
         if (intent.action == ACTION_GEOFENCE_EVENT) {
             GeofenceTransitionsJobIntentService.enqueueWork(context, intent)
         }
     }
 }
-
-
-private const val TAG = "GeofenceReceiver"

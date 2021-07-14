@@ -24,7 +24,7 @@ import org.junit.runner.RunWith
 @MediumTest
 class RemindersLocalRepositoryTest {
 
-    // TODO: Add testing implementation to the RemindersLocalRepository.kt
+    //: Add testing implementation to the RemindersLocalRepository.kt
 
     // Executes each task synchronously using Architecture Components.
     @get:Rule

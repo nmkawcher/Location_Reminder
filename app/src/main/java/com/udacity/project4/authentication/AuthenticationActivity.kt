@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import com.firebase.ui.auth.AuthUI
@@ -19,6 +20,7 @@ import com.udacity.project4.locationreminders.RemindersActivity
  * signed in users to the RemindersActivity.
  */
 class AuthenticationActivity : AppCompatActivity() {
+    private val viewModel by viewModels<AuthenticationViewModel>()
 
     companion object {
         const val TAG = "AuthenticationActivity"
@@ -35,27 +37,30 @@ class AuthenticationActivity : AppCompatActivity() {
         binding.loginBtn.setOnClickListener {
             launchSignInFlow()
         }
-        // TODO: If the user was authenticated, send him to RemindersActivity
 
-        //  TODO: a bonus is to customize the sign in flow to look nice using :
-        //https://github.com/firebase/FirebaseUI-Android/blob/master/auth/README.md#custom-layout
+        observeAuthState()
 
     }
 
+    private fun observeAuthState() {
+        viewModel.authenticationState.observe(this, { authenticationState ->
+            when (authenticationState) {
+                AuthenticationViewModel.AuthenticationState.AUTHENTICATED -> {
+                    startActivity(Intent(this, RemindersActivity::class.java))
+                    finish()
+                }
+                else -> {
+                    Log.d(TAG, "observeAuthState: User Not Authenticated")
+                }
+            }
+        })
+    }
+
     private fun launchSignInFlow() {
-        // Give users the option to sign in / register with their email or Google account.
-        // If users choose to register with their email,
-        // they will need to create a password as well.
         val providers = arrayListOf(
             AuthUI.IdpConfig.EmailBuilder().build(), AuthUI.IdpConfig.GoogleBuilder().build()
-
-            // This is where you can provide more ways for users to register and
-            // sign in.
         )
 
-        // Create and launch sign-in intent.
-        // We listen to the response of this activity with the
-        // SIGN_IN_REQUEST_CODE
         startActivityForResult(
             AuthUI.getInstance()
                 .createSignInIntentBuilder()
@@ -63,13 +68,6 @@ class AuthenticationActivity : AppCompatActivity() {
                 .build(),
             SIGN_IN_REQUEST_CODE
         )
-
-//        val signInIntent = AuthUI.getInstance()
-//            .createSignInIntentBuilder()
-//            .setAvailableProviders(providers)
-//            .build()
-//
-//        signInLauncher.launch(signInIntent)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

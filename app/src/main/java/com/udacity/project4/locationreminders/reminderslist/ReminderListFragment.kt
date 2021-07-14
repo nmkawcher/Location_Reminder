@@ -2,11 +2,8 @@ package com.udacity.project4.locationreminders.reminderslist
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import androidx.databinding.DataBindingUtil
-import androidx.navigation.fragment.NavHostFragment.findNavController
-import androidx.navigation.fragment.findNavController
 import com.firebase.ui.auth.AuthUI
 import com.udacity.project4.R
 import com.udacity.project4.authentication.AuthenticationActivity
@@ -43,25 +40,6 @@ class ReminderListFragment : BaseFragment() {
 
         binding.refreshLayout.setOnRefreshListener { _viewModel.loadReminders() }
 
-        _viewModel.authenticationState.observe(viewLifecycleOwner) { authenticationState ->
-            when (authenticationState) {
-                RemindersListViewModel.AuthenticationState.UNAUTHENTICATED -> {
-                    Log.e(
-                        TAG, "New $authenticationState state that doesn't require any UI change"
-                    )
-                    startActivity(Intent(context, AuthenticationActivity::class.java))
-                    requireActivity().finish()
-                }
-                else -> {
-                    Log.i(
-                        TAG,
-                        "Authenticated"
-                    )
-                    // If the user is not logged in, they should not be able to set any preferences,
-                    // so navigate them to the login fragment
-                }
-            }
-        }
         return binding.root
     }
 
@@ -100,8 +78,13 @@ class ReminderListFragment : BaseFragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.logout -> {
-//                add the logout implementation
-                AuthUI.getInstance().signOut(requireContext())
+                //   add the logout implementation
+                AuthUI.getInstance()
+                    .signOut(requireContext())
+                    .addOnCompleteListener {
+                        startActivity(Intent(activity, AuthenticationActivity::class.java))
+                        activity?.finish()
+                    }
             }
         }
         return super.onOptionsItemSelected(item)
@@ -110,7 +93,7 @@ class ReminderListFragment : BaseFragment() {
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
-//        display logout as menu item
+        // display logout as menu item
         inflater.inflate(R.menu.main_menu, menu)
     }
 
