@@ -3,15 +3,12 @@ package com.udacity.project4.locationreminders.data.local
 import com.udacity.project4.locationreminders.data.FakeDataSource
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import junit.framework.TestCase
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
-import org.hamcrest.MatcherAssert
-import org.hamcrest.core.IsEqual
 import org.junit.Before
 import org.junit.Test
 
-class RemindersLocalRepositoryTest {
+class RemindersLocalRepositoryTests{
     private val reminder1 = ReminderDTO("Title1", "Description1", "Test Location1", 566.0, 456545.0)
     private val reminder2 = ReminderDTO("Title2", "Description2", "Test Location2", 566.0, 456545.0)
 
@@ -39,10 +36,9 @@ class RemindersLocalRepositoryTest {
     @Test
     fun getTasks_requestsAllTasksFromRemoteDataSource() = runBlocking {
         // When tasks are requested from the tasks repository
-       // val tasks = tasksRepository.getTasks(true) as Result.Success
+        // val tasks = tasksRepository.getTasks(true) as Result.Success
 
         // Then tasks are loaded from the remote data source
         //MatcherAssert.assertThat(tasks.data, IsEqual(remoteTasks))
     }
-
 }
