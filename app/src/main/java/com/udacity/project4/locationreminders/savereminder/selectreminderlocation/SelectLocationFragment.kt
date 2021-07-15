@@ -71,7 +71,7 @@ class SelectLocationFragment : BaseFragment() {
         mapFragment?.getMapAsync(callback)
         //  zoom to the user location after taking his permission
        // checkPermissionsAndStartGeofencing()
-        //         add style to the map
+
         //     put a marker to location that the user selected
 
 
@@ -87,6 +87,9 @@ class SelectLocationFragment : BaseFragment() {
         map = googleMap
         setPoiClick(map)
         checkPermissionsAndStartGeofencing()
+        // add style to the map
+        setMapStyle(map)
+
     }
 
     private fun setPoiClick(map: GoogleMap) {
@@ -126,7 +129,6 @@ class SelectLocationFragment : BaseFragment() {
                         } else {
                             Log.d(TAG, "granted")
                             checkDeviceLocationSettingsAndStartGeofence()
-                            //addGeofenceForClue()
                         }
                     }
 
@@ -282,6 +284,23 @@ class SelectLocationFragment : BaseFragment() {
                         .show()
                 }
             }
+    }
+
+    private fun setMapStyle(map: GoogleMap) {
+        try {
+            val success = map.setMapStyle(
+                MapStyleOptions.loadRawResourceStyle(
+                    requireContext(),
+                    R.raw.map_style
+                )
+            )
+
+            if (!success) {
+                Log.e(TAG, "Style parsing failed.")
+            }
+        } catch (e: Resources.NotFoundException) {
+            Log.e(TAG, "Can't find style. Error: ", e)
+        }
     }
 
 }
