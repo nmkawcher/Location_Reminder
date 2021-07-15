@@ -70,10 +70,6 @@ class SelectLocationFragment : BaseFragment() {
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment?.getMapAsync(callback)
         //  zoom to the user location after taking his permission
-       // checkPermissionsAndStartGeofencing()
-
-        //     put a marker to location that the user selected
-
 
         // call this function after the user confirms on the selected location
         binding.saveBtn.setOnClickListener {
@@ -85,11 +81,40 @@ class SelectLocationFragment : BaseFragment() {
 
     private val callback = OnMapReadyCallback { googleMap ->
         map = googleMap
-        setPoiClick(map)
         checkPermissionsAndStartGeofencing()
         // add style to the map
         setMapStyle(map)
 
+        //     put a marker to location that the user selected
+        setMapLongClick(map)
+        setPoiClick(map)
+
+    }
+
+    private fun setMapLongClick(map: GoogleMap) {
+        map.setOnMapLongClickListener { latLng ->
+            // A Snippet is Additional text that's displayed below the title.
+            val snippet = String.format(
+                Locale.getDefault(),
+                "Lat: %1$.5f, Long: %2$.5f",
+                latLng.latitude,
+                latLng.longitude
+            )
+            binding.saveBtn.setOnClickListener {
+                _viewModel.latitude.value = latLng.latitude
+                _viewModel.longitude.value = latLng.longitude
+                _viewModel.reminderSelectedLocationStr.value = getString(R.string.dropped_pin)
+                _viewModel.navigationCommand.value = NavigationCommand.Back
+            }
+
+            map.addMarker(
+                MarkerOptions()
+                    .position(latLng)
+                    .title(getString(R.string.dropped_pin))
+                    .snippet(snippet)
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
+            )
+        }
     }
 
     private fun setPoiClick(map: GoogleMap) {
@@ -115,10 +140,9 @@ class SelectLocationFragment : BaseFragment() {
                 if (isGranted) {
                     // Permission is granted. Continue the action or workflow in your
                     // app.
-                    if (foregroundAndBackgroundLocationPermissionApproved()) {
+                    if (isPermissionApproved()) {
                         Log.d(TAG, "granted")
-                        checkDeviceLocationSettingsAndStartGeofence()
-                        //addGeofenceForClue()
+                        enableMyLocation()
                     } else if (PackageManager.PERMISSION_GRANTED ==
                         ActivityCompat.checkSelfPermission(
                             requireContext(), Manifest.permission.ACCESS_FINE_LOCATION
@@ -128,16 +152,16 @@ class SelectLocationFragment : BaseFragment() {
                             requestPermissionLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
                         } else {
                             Log.d(TAG, "granted")
-                            checkDeviceLocationSettingsAndStartGeofence()
+                            enableMyLocation()
                         }
                     }
 
                 } else {
-                    // Explain to the user that the feature is unavailable because the
-                    // features requires a permission that the user has denied. At the
-                    // same time, respect the user's decision. Don't link to system
-                    // settings in an effort to convince the user to change their
-                    // decision.
+                    Toast.makeText(
+                        context,
+                        "Location permission is required to pick reminder location!",
+                        Toast.LENGTH_SHORT
+                    ).show()
                     Log.d(TAG, "denaid")
                 }
             }
@@ -189,83 +213,25 @@ class SelectLocationFragment : BaseFragment() {
      * current hint isn't yet active.
      */
     private fun checkPermissionsAndStartGeofencing() {
-        if (foregroundAndBackgroundLocationPermissionApproved()) {
-            checkDeviceLocationSettingsAndStartGeofence()
+        if (isPermissionApproved()) {
+            enableMyLocation()
         } else {
             requestForegroundAndBackgroundLocationPermissions()
         }
     }
 
-    /*
-    *  Determines whether the app has the appropriate permissions across Android 10+ and all other
-    *  Android versions.
-    */
-    @TargetApi(29)
-    private fun foregroundAndBackgroundLocationPermissionApproved(): Boolean {
-        val foregroundLocationApproved = (
-                PackageManager.PERMISSION_GRANTED ==
-                        ActivityCompat.checkSelfPermission(
-                            requireContext(), Manifest.permission.ACCESS_FINE_LOCATION
-                        ))
-        val backgroundPermissionApproved =
-            if (runningQOrLater) {
-                PackageManager.PERMISSION_GRANTED ==
-                        ActivityCompat.checkSelfPermission(
-                            requireContext(), Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                        )
-            } else {
-                true
-            }
-        return foregroundLocationApproved && backgroundPermissionApproved
+
+    private fun isPermissionApproved(): Boolean {
+        return ContextCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
     }
 
-    /*
-  *  Requests ACCESS_FINE_LOCATION and (on Android 10+ (Q) ACCESS_BACKGROUND_LOCATION.
-  */
-    @TargetApi(29)
+
     private fun requestForegroundAndBackgroundLocationPermissions() {
-        if (foregroundAndBackgroundLocationPermissionApproved())
+        if (isPermissionApproved())
             return
         requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-    }
-
-    /*
-        *  Uses the Location Client to check the current state of location settings, and gives the user
-        *  the opportunity to turn on location services within our app.
-        */
-    private fun checkDeviceLocationSettingsAndStartGeofence(resolve: Boolean = true) {
-        val locationRequest = LocationRequest.create().apply {
-            priority = LocationRequest.PRIORITY_LOW_POWER
-        }
-        val builder = LocationSettingsRequest.Builder().addLocationRequest(locationRequest)
-        val settingsClient = LocationServices.getSettingsClient(requireActivity())
-        val locationSettingsResponseTask =
-            settingsClient.checkLocationSettings(builder.build())
-        locationSettingsResponseTask.addOnFailureListener { exception ->
-            if (exception is ResolvableApiException && resolve) {
-                try {
-                    exception.startResolutionForResult(
-                        requireActivity(),
-                        REQUEST_TURN_DEVICE_LOCATION_ON
-                    )
-                } catch (sendEx: IntentSender.SendIntentException) {
-                    Log.d(TAG, "Error getting location settings resolution: " + sendEx.message)
-                }
-            } else {
-                Snackbar.make(
-                    binding.fragmentLocation,
-                    "location_required_error", Snackbar.LENGTH_INDEFINITE
-                ).setAction(android.R.string.ok) {
-                    checkDeviceLocationSettingsAndStartGeofence()
-                }.show()
-                Toast.makeText(context, "location_required_error", Toast.LENGTH_SHORT).show()
-            }
-        }
-        locationSettingsResponseTask.addOnCompleteListener {
-            if (it.isSuccessful) {
-                enableMyLocation()
-            }
-        }
     }
 
     @SuppressLint("MissingPermission")
@@ -305,6 +271,5 @@ class SelectLocationFragment : BaseFragment() {
 
 }
 
-private val REQUEST_TURN_DEVICE_LOCATION_ON = 29
 private val TAG = "MapsFragment"
 
