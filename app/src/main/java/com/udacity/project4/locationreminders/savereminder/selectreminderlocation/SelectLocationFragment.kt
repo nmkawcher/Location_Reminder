@@ -46,13 +46,12 @@ class SelectLocationFragment : BaseFragment() {
     override val _viewModel: SaveReminderViewModel by inject()
     private lateinit var binding: FragmentSelectLocationBinding
 
-    // to check if device is running Q or later
-    private val runningQOrLater = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
     private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
     private lateinit var map: GoogleMap
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     private var selectedPOI: PointOfInterest? = null
+    private var pickLocation: LatLng? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -69,7 +68,6 @@ class SelectLocationFragment : BaseFragment() {
         //  add the map setup implementation
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment?.getMapAsync(callback)
-        //  zoom to the user location after taking his permission
 
         // call this function after the user confirms on the selected location
         binding.saveBtn.setOnClickListener {
@@ -81,31 +79,25 @@ class SelectLocationFragment : BaseFragment() {
 
     private val callback = OnMapReadyCallback { googleMap ->
         map = googleMap
-        checkPermissionsAndStartGeofencing()
+        checkPermissions()
         // add style to the map
         setMapStyle(map)
-
-        //     put a marker to location that the user selected
+        // put a marker to location that the user selected
         setMapLongClick(map)
         setPoiClick(map)
-
     }
 
     private fun setMapLongClick(map: GoogleMap) {
         map.setOnMapLongClickListener { latLng ->
+            map.clear()
             // A Snippet is Additional text that's displayed below the title.
+            pickLocation = latLng
             val snippet = String.format(
                 Locale.getDefault(),
                 "Lat: %1$.5f, Long: %2$.5f",
                 latLng.latitude,
                 latLng.longitude
             )
-            binding.saveBtn.setOnClickListener {
-                _viewModel.latitude.value = latLng.latitude
-                _viewModel.longitude.value = latLng.longitude
-                _viewModel.reminderSelectedLocationStr.value = getString(R.string.dropped_pin)
-                _viewModel.navigationCommand.value = NavigationCommand.Back
-            }
 
             map.addMarker(
                 MarkerOptions()
@@ -140,29 +132,13 @@ class SelectLocationFragment : BaseFragment() {
                 if (isGranted) {
                     // Permission is granted. Continue the action or workflow in your
                     // app.
-                    if (isPermissionApproved()) {
-                        Log.d(TAG, "granted")
-                        enableMyLocation()
-                    } else if (PackageManager.PERMISSION_GRANTED ==
-                        ActivityCompat.checkSelfPermission(
-                            requireContext(), Manifest.permission.ACCESS_FINE_LOCATION
-                        )
-                    ) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                            requestPermissionLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-                        } else {
-                            Log.d(TAG, "granted")
-                            enableMyLocation()
-                        }
-                    }
-
+                    enableMyLocation()
                 } else {
                     Toast.makeText(
                         context,
                         "Location permission is required to pick reminder location!",
                         Toast.LENGTH_SHORT
                     ).show()
-                    Log.d(TAG, "denaid")
                 }
             }
     }
@@ -171,14 +147,23 @@ class SelectLocationFragment : BaseFragment() {
         //         When the user confirms on the selected location,
         //         send back the selected location details to the view model
         //         and navigate back to the previous fragment to save the reminder and add the geofence
-        if (selectedPOI != null) {
-            _viewModel.selectedPOI.value = selectedPOI
-            _viewModel.reminderSelectedLocationStr.value = selectedPOI!!.name
-            _viewModel.latitude.value = selectedPOI!!.latLng.latitude
-            _viewModel.longitude.value = selectedPOI!!.latLng.longitude
-            _viewModel.navigationCommand.value = NavigationCommand.Back
-        } else {
-            Toast.makeText(context, "Please Select a location!", Toast.LENGTH_SHORT).show()
+        when {
+            selectedPOI != null -> {
+                _viewModel.selectedPOI.value = selectedPOI
+                _viewModel.reminderSelectedLocationStr.value = selectedPOI!!.name
+                _viewModel.latitude.value = selectedPOI!!.latLng.latitude
+                _viewModel.longitude.value = selectedPOI!!.latLng.longitude
+                _viewModel.navigationCommand.value = NavigationCommand.Back
+            }
+            pickLocation != null -> {
+                _viewModel.latitude.value = pickLocation!!.latitude
+                _viewModel.longitude.value = pickLocation!!.longitude
+                _viewModel.reminderSelectedLocationStr.value = getString(R.string.dropped_pin)
+                _viewModel.navigationCommand.value = NavigationCommand.Back
+            }
+            else -> {
+                Toast.makeText(context, "Please Select a location!", Toast.LENGTH_SHORT).show()
+            }
         }
 
     }
@@ -208,27 +193,23 @@ class SelectLocationFragment : BaseFragment() {
         else -> super.onOptionsItemSelected(item)
     }
 
-    /**
-     * Starts the permission check and Geofence process only if the Geofence associated with the
-     * current hint isn't yet active.
-     */
-    private fun checkPermissionsAndStartGeofencing() {
+    private fun checkPermissions() {
         if (isPermissionApproved()) {
             enableMyLocation()
         } else {
-            requestForegroundAndBackgroundLocationPermissions()
+            requestLocationPermissions()
         }
     }
-
 
     private fun isPermissionApproved(): Boolean {
         return ContextCompat.checkSelfPermission(
             requireContext(),
-            Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
     }
 
 
-    private fun requestForegroundAndBackgroundLocationPermissions() {
+    private fun requestLocationPermissions() {
         if (isPermissionApproved())
             return
         requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
@@ -243,6 +224,7 @@ class SelectLocationFragment : BaseFragment() {
             .addOnSuccessListener { location: Location? ->
                 if (location != null) {
                     val latLng = LatLng(location.latitude, location.longitude)
+                    //  zoom to the user location after taking his permission
                     val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 12f)
                     map.animateCamera(cameraUpdate)
                 } else {
@@ -262,14 +244,13 @@ class SelectLocationFragment : BaseFragment() {
             )
 
             if (!success) {
-                Log.e(TAG, "Style parsing failed.")
+                Toast.makeText(context, "Style parsing failed.", Toast.LENGTH_SHORT).show()
             }
         } catch (e: Resources.NotFoundException) {
-            Log.e(TAG, "Can't find style. Error: ", e)
+            Toast.makeText(context, "Can't find style. Error: ${e.message}", Toast.LENGTH_SHORT)
+                .show()
         }
     }
 
 }
-
-private val TAG = "MapsFragment"
 
