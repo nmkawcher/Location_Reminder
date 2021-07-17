@@ -90,7 +90,6 @@ class SaveReminderFragment : BaseFragment() {
 //             1) add a geofencing request
 //             2) save the reminder to the local db
 
-            _viewModel.validateAndSaveReminder(reminderData!!)
             if (latitude != null || longitude != null) {
                 checkLocationPermissions()
             }
@@ -163,6 +162,7 @@ class SaveReminderFragment : BaseFragment() {
         geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent).run {
             addOnSuccessListener {
                 //After successful geofence added save reminder data to db
+                _viewModel.validateAndSaveReminder(reminderData)
             }
             addOnFailureListener {
                 Toast.makeText(
@@ -223,6 +223,7 @@ class SaveReminderFragment : BaseFragment() {
         val settingsClient = LocationServices.getSettingsClient(requireActivity())
         val locationSettingsResponseTask =
             settingsClient.checkLocationSettings(builder.build())
+
         locationSettingsResponseTask.addOnFailureListener { exception ->
             if (exception is ResolvableApiException && resolve) {
                 try {
@@ -236,7 +237,7 @@ class SaveReminderFragment : BaseFragment() {
             } else {
                 Snackbar.make(
                     binding.fragmentSaveReminder,
-                    R.string.location_required_error, Snackbar.LENGTH_INDEFINITE
+                    R.string.location_required_error, Snackbar.LENGTH_LONG
                 ).setAction(android.R.string.ok) {
                     checkDeviceLocationSettings()
                 }.show()

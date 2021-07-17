@@ -44,7 +44,7 @@ import org.koin.test.get
 import org.robolectric.annotation.Config
 
 
-@Config(sdk = [Build.VERSION_CODES.Q])
+@Config(sdk = [Build.VERSION_CODES.P])
 @RunWith(AndroidJUnit4::class)
 @LargeTest
 class RemindersActivityTest :
@@ -152,11 +152,16 @@ class RemindersActivityTest :
 
         onView(withId(R.id.addReminderFAB)).perform(click())
         onView(withId(R.id.reminderDescription)).perform(replaceText(reminder.description))
+
+        val viewModel: SaveReminderViewModel by inject()
+        viewModel.reminderSelectedLocationStr.postValue(appContext.getString(R.string.dropped_pin))
+        viewModel.latitude.postValue(reminder.latitude)
+        viewModel.longitude.postValue(reminder.longitude)
+
         onView(withId(R.id.saveReminder)).perform(click())
 
-        val snackBarMessage = appContext.getString(R.string.err_enter_title)
-        onView(withText(snackBarMessage))
-            .check(matches(isDisplayed()))
+        onView(withId(com.google.android.material.R.id.snackbar_text))
+            .check(matches(withText(R.string.err_enter_title)))
 
         // Delay
         runBlocking {
