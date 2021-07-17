@@ -2,7 +2,7 @@ package com.udacity.project4
 
 
 import android.app.Application
-import android.util.Log
+import android.os.Build
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import androidx.test.espresso.Espresso.onView
@@ -33,19 +33,25 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
+import org.koin.core.inject
+import org.koin.core.module.Module
 import org.koin.dsl.module
 import org.koin.test.AutoCloseKoinTest
 import org.koin.test.get
+import org.robolectric.annotation.Config
 
 
+@Config(sdk = [Build.VERSION_CODES.Q])
 @RunWith(AndroidJUnit4::class)
 @LargeTest
 class RemindersActivityTest :
     AutoCloseKoinTest() {
 
+    private lateinit var myModule: Module
     private lateinit var repository: ReminderDataSource
     private lateinit var appContext: Application
 
@@ -57,7 +63,7 @@ class RemindersActivityTest :
     fun init() {
         stopKoin()
         appContext = getApplicationContext()
-        val myModule = module {
+        myModule = module {
             viewModel {
                 RemindersListViewModel(
                     appContext,
@@ -74,6 +80,7 @@ class RemindersActivityTest :
             single { LocalDB.createRemindersDao(appContext) }
         }
         startKoin {
+            androidContext(appContext)
             modules(listOf(myModule))
         }
         repository = get()
@@ -131,11 +138,10 @@ class RemindersActivityTest :
         onView(withText(reminder.location))
             .check(matches(isDisplayed()))
 
-        scenario.close()
-
         runBlocking {
             delay(2000)
         }
+        scenario.close()
     }
 
     @Test
@@ -154,12 +160,12 @@ class RemindersActivityTest :
         onView(withText(snackBarMessage))
             .check(matches(isDisplayed()))
 
-        activityScenario.close()
-
         // Delay
         runBlocking {
             delay(2000)
         }
+
+        activityScenario.close()
     }
 
     @Test
@@ -174,15 +180,22 @@ class RemindersActivityTest :
         onView(withId(R.id.reminderTitle)).perform(replaceText(reminder.title))
         onView(withId(R.id.reminderDescription)).perform(replaceText(reminder.description))
 
-        val viewModel = SaveReminderViewModel(appContext, repository)
+        val viewModel: SaveReminderViewModel by inject()
         viewModel.reminderSelectedLocationStr.postValue(appContext.getString(R.string.dropped_pin))
         viewModel.latitude.postValue(reminder.latitude)
         viewModel.longitude.postValue(reminder.longitude)
 
         onView(withId(R.id.saveReminder)).perform(click())
 
-//        onView(withText(R.string.reminder_saved)).inRoot(isToast()).check(matches(isDisplayed()))
-        onView(withText(R.string.reminder_saved)).check(matches(isDisplayed()))
+        onView(withText(R.string.reminder_saved)).inRoot(
+            withDecorView(
+                not(
+                    `is`(
+                        getActivity(appContext)?.window?.decorView
+                    )
+                )
+            )
+        ).check(matches(isDisplayed()))
 
         // Delay
         runBlocking {
