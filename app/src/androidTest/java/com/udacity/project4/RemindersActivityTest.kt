@@ -10,6 +10,7 @@ import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.action.ViewActions.replaceText
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.RootMatchers.withDecorView
 import androidx.test.espresso.matcher.ViewMatchers
@@ -121,7 +122,7 @@ class RemindersActivityTest :
     }
 
     @Test
-    fun createReminder_checkRemindersList() = runBlocking {
+    fun createReminderAndCheckRemindersList() = runBlocking {
         val reminder = getReminder()
         repository.saveReminder(reminder)
 
@@ -135,20 +136,6 @@ class RemindersActivityTest :
         onView(withText(reminder.location))
             .check(matches(isDisplayed()))
 
-//        onView(withText(R.string.TOAST_STRING)).inRoot(
-//            withDecorView(
-//                not(
-//                    `is`(
-//                        getActivity(appContext)?.window?.decorView
-//                    )
-//                )
-//            )
-//        ).check(
-//            matches(
-//                isDisplayed()
-//            )
-//        )
-
         runBlocking {
             delay(2000)
         }
@@ -157,26 +144,55 @@ class RemindersActivityTest :
     }
 
     @Test
-    fun clickSaveReminder_checkSnackBarAndToast() = runBlocking {
-        val reminder = ReminderDTO(
-            title = "",
-            description = "description",
-            location = "location",
-            latitude = 23.807398,
-            longitude = 90.368695
-        )
-        repository.saveReminder(reminder)
-//        val scenario = ActivityScenario.launch(SaveReminderFragment::class.java)
-//        dataBindingIdlingResource.monitorActivity(scenario)
+    fun addReminderWithoutTitleAndConfirmSnackBarDisplays(): Unit = runBlocking {
+        // Create new reminder
+        val reminder = getReminder()
 
-        // WHEN - save fragment launched to display task
-        launchFragmentInContainer<SaveReminderFragment>(bundleOf(), R.style.Theme)
+        val activityScenario = ActivityScenario.launch(RemindersActivity::class.java)
+        dataBindingIdlingResource.monitorActivity(activityScenario)
 
-        //onView(withId(R.id.saveReminder)).perform(click())
-        onView(withId(com.google.android.material.R.id.snackbar_text))
-            .check(matches(withText("")))
+//        onView(withId(R.id.addReminderFAB)).perform(click())
+//        onView(withId(R.id.reminderDescription)).perform(replaceText(reminder.description))
+//        onView(withId(R.id.saveReminder)).perform(click())
+//
+//        val snackBarMessage = appContext.getString(R.string.err_enter_title)
+//        onView(withText(snackBarMessage))
+//            .check(matches(isDisplayed()))
 
-        //scenario.close()
+        activityScenario.close()
+
+        // Delay
+        runBlocking {
+            delay(2000)
+        }
+    }
+
+    @Test
+    fun addReminderAndConfirmToastDisplays(): Unit = runBlocking {
+        // Create new reminder
+        val reminder = getReminder()
+
+        val activityScenario = ActivityScenario.launch(RemindersActivity::class.java)
+        dataBindingIdlingResource.monitorActivity(activityScenario)
+
+//        onView(withId(R.id.addReminderFAB)).perform(click())
+//        onView(withId(R.id.reminderTitle)).perform(replaceText(reminder.title))
+//        onView(withId(R.id.reminderDescription)).perform(replaceText(reminder.description))
+//        onView(withId(R.id.selectLocation)).perform(click())
+//
+//        onView(withId(R.id.support_map_fragment)).check(matches(isDisplayed()))
+//        onView(withId(R.id.support_map_fragment)).perform(click())
+//        onView(withId(R.id.select_location_save_button)).perform(click())
+//        onView(withId(R.id.saveReminder)).perform(click())
+//
+//        onView(withText(R.string.reminder_saved)).inRoot(isToast()).check(matches(isDisplayed()))
+
+        activityScenario.close()
+
+        // Delay
+        runBlocking {
+            delay(2000)
+        }
     }
 
 }
