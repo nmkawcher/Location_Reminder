@@ -2,18 +2,15 @@ package com.udacity.project4
 
 
 import android.app.Application
-import androidx.core.os.bundleOf
-import androidx.fragment.app.testing.launchFragmentInContainer
+import android.util.Log
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
-import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.replaceText
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.RootMatchers.withDecorView
-import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
@@ -24,8 +21,6 @@ import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.data.local.LocalDB
 import com.udacity.project4.locationreminders.data.local.RemindersLocalRepository
 import com.udacity.project4.locationreminders.reminderslist.RemindersListViewModel
-import com.udacity.project4.locationreminders.savereminder.SaveReminderFragment
-import com.udacity.project4.locationreminders.savereminder.SaveReminderFragmentDirections
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
 import com.udacity.project4.util.DataBindingIdlingResource
 import com.udacity.project4.util.monitorActivity
@@ -136,11 +131,11 @@ class RemindersActivityTest :
         onView(withText(reminder.location))
             .check(matches(isDisplayed()))
 
+        scenario.close()
+
         runBlocking {
             delay(2000)
         }
-
-        scenario.close()
     }
 
     @Test
@@ -178,21 +173,23 @@ class RemindersActivityTest :
         onView(withId(R.id.addReminderFAB)).perform(click())
         onView(withId(R.id.reminderTitle)).perform(replaceText(reminder.title))
         onView(withId(R.id.reminderDescription)).perform(replaceText(reminder.description))
-        onView(withId(R.id.selectLocation)).perform(click())
 
-//        onView(withId(R.id.support_map_fragment)).check(matches(isDisplayed()))
-//        onView(withId(R.id.support_map_fragment)).perform(click())
-//        onView(withId(R.id.select_location_save_button)).perform(click())
+        val viewModel = SaveReminderViewModel(appContext, repository)
+        viewModel.reminderSelectedLocationStr.postValue(appContext.getString(R.string.dropped_pin))
+        viewModel.latitude.postValue(reminder.latitude)
+        viewModel.longitude.postValue(reminder.longitude)
+
         onView(withId(R.id.saveReminder)).perform(click())
 
-        //onView(withText(R.string.reminder_saved)).inRoot(isToast()).check(matches(isDisplayed()))
-
-        activityScenario.close()
+//        onView(withText(R.string.reminder_saved)).inRoot(isToast()).check(matches(isDisplayed()))
+        onView(withText(R.string.reminder_saved)).check(matches(isDisplayed()))
 
         // Delay
         runBlocking {
             delay(2000)
         }
+
+        activityScenario.close()
     }
 
 }

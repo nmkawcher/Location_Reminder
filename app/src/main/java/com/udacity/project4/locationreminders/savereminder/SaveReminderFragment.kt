@@ -78,24 +78,21 @@ class SaveReminderFragment : BaseFragment() {
             val location = _viewModel.reminderSelectedLocationStr.value
             val latitude = _viewModel.latitude.value
             val longitude = _viewModel.longitude.value
-            if (latitude != null || longitude != null) {
-                reminderData = ReminderDataItem(
-                    title,
-                    description,
-                    location,
-                    latitude,
-                    longitude
-                )
-            }
+            reminderData = ReminderDataItem(
+                title,
+                description,
+                location,
+                latitude,
+                longitude
+            )
 
 //            : use the user entered reminder details to:
 //             1) add a geofencing request
 //             2) save the reminder to the local db
-            if (reminderData != null) {
+
+            _viewModel.validateAndSaveReminder(reminderData!!)
+            if (latitude != null || longitude != null) {
                 checkLocationPermissions()
-            } else {
-                Toast.makeText(context, "Please select reminder location!", Toast.LENGTH_SHORT)
-                    .show()
             }
 
         }
@@ -143,6 +140,9 @@ class SaveReminderFragment : BaseFragment() {
    */
     @SuppressLint("MissingPermission")
     private fun addGeofenceForReminder(reminderData: ReminderDataItem) {
+        if (reminderData.latitude == null) {
+            return
+        }
 
         val geofenceData = Geofence.Builder()
             .setRequestId(reminderData.id)
@@ -163,7 +163,6 @@ class SaveReminderFragment : BaseFragment() {
         geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent).run {
             addOnSuccessListener {
                 //After successful geofence added save reminder data to db
-                _viewModel.validateAndSaveReminder(reminderData)
             }
             addOnFailureListener {
                 Toast.makeText(
