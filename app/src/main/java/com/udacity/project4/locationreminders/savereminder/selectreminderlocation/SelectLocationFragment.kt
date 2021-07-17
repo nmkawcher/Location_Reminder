@@ -146,7 +146,7 @@ class SelectLocationFragment : BaseFragment() {
                     Snackbar.make(
                         binding.fragmentLocation,
                         R.string.permission_denied_explanation,
-                        Snackbar.LENGTH_INDEFINITE
+                        Snackbar.LENGTH_LONG
                     )
                         .setAction(R.string.settings) {
                             startActivity(Intent().apply {
