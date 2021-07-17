@@ -1,7 +1,6 @@
 package com.udacity.project4.locationreminders.reminderslist
 
 import android.app.Application
-import android.content.Context
 import android.os.Bundle
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.fragment.app.testing.launchFragmentInContainer
@@ -28,24 +27,27 @@ import com.udacity.project4.utils.EspressoIdlingResource
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import org.junit.After
-import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
-import org.koin.core.context.GlobalContext
+import org.koin.test.get
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
+import org.koin.test.AutoCloseKoinTest
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
+
 
 @RunWith(AndroidJUnit4::class)
 @ExperimentalCoroutinesApi
 //UI Testing
 @MediumTest
-class ReminderListFragmentTest {
+class ReminderListFragmentTest :
+    AutoCloseKoinTest(){
 
 //   : test the displayed data on the UI.
 //    : add testing for the error messages.
@@ -58,25 +60,6 @@ class ReminderListFragmentTest {
     @get:Rule
     var instantExecutorRule = InstantTaskExecutorRule()
 
-
-    /**
-     * Idling resources tell Espresso that the app is idle or busy. This is needed when operations
-     * are not scheduled in the main Looper (for example when executed on a different thread).
-     */
-    @Before
-    fun registerIdlingResource(): Unit = IdlingRegistry.getInstance().run {
-        IdlingRegistry.getInstance().register(EspressoIdlingResource.countingIdlingResource)
-        IdlingRegistry.getInstance().register(dataBindingIdlingResource)
-    }
-
-    /**
-     * Unregister your Idling Resource so it can be garbage collected and does not leak any memory.
-     */
-    @After
-    fun unregisterIdlingResource(): Unit = IdlingRegistry.getInstance().run {
-        IdlingRegistry.getInstance().unregister(EspressoIdlingResource.countingIdlingResource)
-        IdlingRegistry.getInstance().unregister(dataBindingIdlingResource)
-    }
 
     @Before
     fun init() {
@@ -95,17 +78,37 @@ class ReminderListFragmentTest {
                     get() as ReminderDataSource
                 )
             }
-            single { RemindersLocalRepository(get()) }
+            single { RemindersLocalRepository(get()) as ReminderDataSource }
             single { LocalDB.createRemindersDao(appContext) }
         }
         startKoin {
+            androidContext(appContext)
             modules(listOf(myModule))
         }
-        repository = GlobalContext.get().koin.get()
+        repository = get()
 
         runBlocking {
             repository.deleteAllReminders()
         }
+    }
+
+    /**
+     * Idling resources tell Espresso that the app is idle or busy. This is needed when operations
+     * are not scheduled in the main Looper (for example when executed on a different thread).
+     */
+    @Before
+    fun registerIdlingResource(): Unit = IdlingRegistry.getInstance().run {
+        IdlingRegistry.getInstance().register(EspressoIdlingResource.countingIdlingResource)
+        IdlingRegistry.getInstance().register(dataBindingIdlingResource)
+    }
+
+    /**
+     * Unregister your Idling Resource so it can be garbage collected and does not leak any memory.
+     */
+    @After
+    fun unregisterIdlingResource(): Unit = IdlingRegistry.getInstance().run {
+        IdlingRegistry.getInstance().unregister(EspressoIdlingResource.countingIdlingResource)
+        IdlingRegistry.getInstance().unregister(dataBindingIdlingResource)
     }
 
 
@@ -166,5 +169,6 @@ class ReminderListFragmentTest {
         }
 
         onView(withId(R.id.noDataTextView)).check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
+
     }
 }

@@ -38,7 +38,6 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.core.inject
-import org.koin.core.module.Module
 import org.koin.dsl.module
 import org.koin.test.AutoCloseKoinTest
 import org.koin.test.get
@@ -51,7 +50,6 @@ import org.robolectric.annotation.Config
 class RemindersActivityTest :
     AutoCloseKoinTest() {
 
-    private lateinit var myModule: Module
     private lateinit var repository: ReminderDataSource
     private lateinit var appContext: Application
 
@@ -63,7 +61,7 @@ class RemindersActivityTest :
     fun init() {
         stopKoin()
         appContext = getApplicationContext()
-        myModule = module {
+        val myModule = module {
             viewModel {
                 RemindersListViewModel(
                     appContext,
