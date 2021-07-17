@@ -1,6 +1,6 @@
 package com.udacity.project4
 
-import android.R
+
 import android.app.Application
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
@@ -151,13 +151,13 @@ class RemindersActivityTest :
         val activityScenario = ActivityScenario.launch(RemindersActivity::class.java)
         dataBindingIdlingResource.monitorActivity(activityScenario)
 
-//        onView(withId(R.id.addReminderFAB)).perform(click())
-//        onView(withId(R.id.reminderDescription)).perform(replaceText(reminder.description))
-//        onView(withId(R.id.saveReminder)).perform(click())
-//
-//        val snackBarMessage = appContext.getString(R.string.err_enter_title)
-//        onView(withText(snackBarMessage))
-//            .check(matches(isDisplayed()))
+        onView(withId(R.id.addReminderFAB)).perform(click())
+        onView(withId(R.id.reminderDescription)).perform(replaceText(reminder.description))
+        onView(withId(R.id.saveReminder)).perform(click())
+
+        val snackBarMessage = appContext.getString(R.string.err_enter_title)
+        onView(withText(snackBarMessage))
+            .check(matches(isDisplayed()))
 
         activityScenario.close()
 
@@ -175,17 +175,17 @@ class RemindersActivityTest :
         val activityScenario = ActivityScenario.launch(RemindersActivity::class.java)
         dataBindingIdlingResource.monitorActivity(activityScenario)
 
-//        onView(withId(R.id.addReminderFAB)).perform(click())
-//        onView(withId(R.id.reminderTitle)).perform(replaceText(reminder.title))
-//        onView(withId(R.id.reminderDescription)).perform(replaceText(reminder.description))
-//        onView(withId(R.id.selectLocation)).perform(click())
-//
+        onView(withId(R.id.addReminderFAB)).perform(click())
+        onView(withId(R.id.reminderTitle)).perform(replaceText(reminder.title))
+        onView(withId(R.id.reminderDescription)).perform(replaceText(reminder.description))
+        onView(withId(R.id.selectLocation)).perform(click())
+
 //        onView(withId(R.id.support_map_fragment)).check(matches(isDisplayed()))
 //        onView(withId(R.id.support_map_fragment)).perform(click())
 //        onView(withId(R.id.select_location_save_button)).perform(click())
-//        onView(withId(R.id.saveReminder)).perform(click())
-//
-//        onView(withText(R.string.reminder_saved)).inRoot(isToast()).check(matches(isDisplayed()))
+        onView(withId(R.id.saveReminder)).perform(click())
+
+        //onView(withText(R.string.reminder_saved)).inRoot(isToast()).check(matches(isDisplayed()))
 
         activityScenario.close()
 
