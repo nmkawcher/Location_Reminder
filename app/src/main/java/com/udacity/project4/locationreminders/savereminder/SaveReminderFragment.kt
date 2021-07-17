@@ -78,7 +78,7 @@ class SaveReminderFragment : BaseFragment() {
             val location = _viewModel.reminderSelectedLocationStr.value
             val latitude = _viewModel.latitude.value
             val longitude = _viewModel.longitude.value
-            if (!title.isNullOrEmpty() || !description.isNullOrEmpty() || !location.isNullOrEmpty()) {
+            if (latitude != null || longitude != null) {
                 reminderData = ReminderDataItem(
                     title,
                     description,
@@ -94,7 +94,8 @@ class SaveReminderFragment : BaseFragment() {
             if (reminderData != null) {
                 checkLocationPermissions()
             } else {
-                Toast.makeText(context, "Please select reminder location!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Please select reminder location!", Toast.LENGTH_SHORT)
+                    .show()
             }
 
         }
