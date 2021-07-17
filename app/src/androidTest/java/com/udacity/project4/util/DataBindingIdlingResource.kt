@@ -111,3 +111,4 @@ fun DataBindingIdlingResource.monitorFragment(fragmentScenario: FragmentScenario
         this.activity = it.requireActivity()
     }
 }
+

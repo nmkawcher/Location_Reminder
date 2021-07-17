@@ -75,8 +75,8 @@ class RemindersActivityTest :
     }
 
 
-//   : add End to End testing to the app
-private val dataBindingIdlingResource = DataBindingIdlingResource()
+    //   : add End to End testing to the app
+    private val dataBindingIdlingResource = DataBindingIdlingResource()
 
     /**
      * Idling resources tell Espresso that the app is idle or busy. This is needed when operations
@@ -103,7 +103,8 @@ private val dataBindingIdlingResource = DataBindingIdlingResource()
             description = "description",
             location = "location",
             latitude = 23.807398,
-            longitude = 90.368695)
+            longitude = 90.368695
+        )
     }
 
     @Test
@@ -114,13 +115,18 @@ private val dataBindingIdlingResource = DataBindingIdlingResource()
         val scenario = ActivityScenario.launch(RemindersActivity::class.java)
         dataBindingIdlingResource.monitorActivity(scenario)
 
-        Espresso.onView(ViewMatchers.withText(reminder.title)).check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
-        Espresso.onView(ViewMatchers.withText(reminder.description)).check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
-        Espresso.onView(ViewMatchers.withText(reminder.location)).check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
+        Espresso.onView(ViewMatchers.withText(reminder.title))
+            .check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
+        Espresso.onView(ViewMatchers.withText(reminder.description))
+            .check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
+        Espresso.onView(ViewMatchers.withText(reminder.location))
+            .check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
 
         runBlocking {
             delay(2000)
         }
+
+        scenario.close()
     }
 
 }
