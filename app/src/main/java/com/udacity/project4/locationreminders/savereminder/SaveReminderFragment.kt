@@ -15,6 +15,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.databinding.DataBindingUtil
 import com.google.android.gms.common.api.ResolvableApiException
@@ -236,6 +238,13 @@ class SaveReminderFragment : BaseFragment() {
                         0,
                         null
                     )
+
+//                    registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+//                        if (result.resultCode == REQUEST_TURN_DEVICE_LOCATION_ON) {
+//                            // Your logic
+//                        }
+//                    }.launch(IntentSenderRequest.Builder(exception.resolution.intentSender).build())
+
                 } catch (sendEx: IntentSender.SendIntentException) {
                     Log.d(TAG, "Error getting location settings resolution: " + sendEx.message)
                 }
